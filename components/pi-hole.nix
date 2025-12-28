@@ -1,8 +1,6 @@
 {
-  pkgs,
   lib,
   systemName,
-  config,
   secrets,
   ...
 }:
@@ -50,35 +48,4 @@ in
   };
 
   services.tailscale.tags = lib.mkBefore [ "tag:pi-hole" ];
-
-  # One-shot task to make sure we're serving the Pi-Hole web UI over Tailscale, if it's enabled
-  systemd.services.pi-hole-tailscale-serve = lib.mkIf config.services.tailscale.enable {
-    description = "Serve the Pi-Hole web UI over Tailscale";
-
-    after = [
-      "tailscaled-autoconnect.service"
-      "pihole-ftl.service"
-    ];
-    wants = [
-      "tailscaled-autoconnect.service"
-      "pihole-ftl.service"
-    ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig.Type = "oneshot";
-
-    path = with pkgs; [
-      tailscale
-      jq
-    ];
-    script = ''
-      status="$(tailscale serve status --json | jq -r 'getpath(["TCP","443","HTTPS"]) // empty')"
-       if [ $status = "True" ]; then
-         echo "Pi-Hole web UI is already being served over Tailscale"
-         exit 0
-       fi
-
-       tailscale serve --bg https+insecure://localhost:443
-    '';
-  };
 }

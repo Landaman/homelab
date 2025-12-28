@@ -24,6 +24,13 @@
             ./hardware/pi/hardware-pi02.nix
             ./common.nix
             ./components/pi-hole.nix
+            (import ./components/tailscale-serve.nix {
+              name = "pi-hole-tailscale-serve";
+              description = "Serve the Pi-Hole web UI over Tailscale";
+              localPort = 443;
+              tailscalePort = 443;
+              depends = "pihole-ftl.service";
+            })
           ];
         };
 
