@@ -14,10 +14,14 @@
 
       # Helper to make multiple pi systems with the same config
       mkPiHole =
-        specialArgs:
+        {
+          systemName,
+          specialArgs ? { },
+          extraModules ? [ ],
+        }:
         nixpkgs.lib.nixosSystem {
           specialArgs = specialArgs // {
-            inherit secrets;
+            inherit secrets systemName;
             hardware = nixos-hardware;
           };
           modules = [
@@ -31,7 +35,8 @@
               tailscalePort = 443;
               depends = "pihole-ftl.service";
             })
-          ];
+          ]
+          ++ extraModules;
         };
 
     in
