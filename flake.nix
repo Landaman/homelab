@@ -46,6 +46,20 @@
           systemName = "nine-cross-pi-hole";
         };
 
+        nine-cross-pi-hole-secondary = mkPiHole {
+          systemName = "nine-cross-pi-hole-secondary";
+          extraModules = [
+            ./components/homebridge.nix
+            (import ./components/tailscale-serve.nix {
+              name = "homebridge-tailscale-serve";
+              description = "Serve the Homebridge web UI over Tailscale";
+              localPort = 8581;
+              tailscalePort = 8581;
+              depends = "homebridge.service";
+            })
+          ];
+        };
+
         adria-pi-hole = mkPiHole {
           systemName = "adria-pi-hole";
         };
