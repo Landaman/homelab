@@ -88,6 +88,11 @@ in
           "expirySeconds": 60
         }' | jq -r '.key')"
 
+        if [[ -z "$deviceKey" ]]; then
+          echo "Failed to generate Tailscale device key"
+          exit 1
+        fi
+
         echo "$deviceKey" > /etc/tailnet-auth-key
         echo "Wrote device key to /etc/tailnet-auth-key"
       '';
