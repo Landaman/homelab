@@ -27,9 +27,13 @@ in
       wantedBy = [ "tailscaled-autoconnect.service" ];
       after = [
         "tailescaled.service"
+        "network-online.target"
+        "time-sync.target"
       ];
       wants = [
         "tailescaled.service"
+        "network-online.target"
+        "time-sync.target"
       ];
       serviceConfig = {
         Type = "oneshot";
@@ -41,26 +45,7 @@ in
         curl
       ];
       script = ''
-        wait_for_time() {
-          local i=0
-
-          while (( i < 60 )); do
-            local year
-            year=$(date +%Y)
-
-            if (( year > 2000 )); then
-              return 0
-            fi
-
-            sleep 1
-            ((i++))
-          done
-
-          echo "Error: Time did not sync" >&2
-          exit 1
-        }
-
-        wait_for_time
+        set -o pipefail
 
         state="$(tailscale status --json --peers=false | jq -r '.BackendState')"
 
@@ -91,11 +76,11 @@ in
                 "ephemeral": false,
                 "preauthorized": false,
                 "tags": [
-                  ${
-                    lib.concatStringsSep "\n" (
+                  ${lib.concatStringsSep "," (
+                    lib.map (string: "\"${string}\"") (
                       config.services.tailscale.tags ++ [ "tag:${networkSecrets.tailscale.locationTag}" ]
                     )
-                  },
+                  )}
                 ]
               }
             }
