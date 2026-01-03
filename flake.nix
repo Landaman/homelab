@@ -28,13 +28,14 @@
             ./hardware/pi/hardware-pi02.nix
             ./common.nix
             ./components/pi-hole.nix
-            (import ./components/tailscale-serve.nix {
-              name = "pi-hole-tailscale-serve";
-              description = "Serve the Pi-Hole web UI over Tailscale";
-              localPort = 443;
-              tailscalePort = 443;
-              depends = "pihole-ftl.service";
-            })
+            {
+              services.tailscale.serve = {
+                "443" = {
+                  target = "https+insecure://localhost:443";
+                  depends = [ "pihole-ftl.service" ];
+                };
+              };
+            }
           ]
           ++ extraModules;
         };
@@ -50,13 +51,12 @@
           systemName = "nine-cross-pi-hole-secondary";
           extraModules = [
             ./components/homebridge.nix
-            (import ./components/tailscale-serve.nix {
-              name = "homebridge-tailscale-serve";
-              description = "Serve the Homebridge web UI over Tailscale";
-              localPort = 8581;
-              tailscalePort = 8581;
-              depends = "homebridge.service";
-            })
+            {
+              services.tailscale.serve."8581" = {
+                target = "http://localhost:8581";
+                depends = [ "homebridge.service" ];
+              };
+            }
           ];
         };
 
