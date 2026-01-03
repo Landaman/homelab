@@ -1,13 +1,7 @@
 {
   lib,
-  systemName,
-  secrets,
   ...
 }:
-let
-  systemSecrets = secrets."${systemName}";
-  networkSecrets = secrets.networks.${systemSecrets.network};
-in
 {
   services.pihole-ftl = {
     enable = true;
@@ -31,7 +25,6 @@ in
           "149.112.112.112"
           "2620:fe::fe"
           "2620:fe::9"
-          networkSecrets.defaultGateway
         ];
       };
     };
