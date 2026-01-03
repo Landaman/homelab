@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   ...
 }:
 {
@@ -9,6 +10,28 @@
     openFirewallWebserver = true;
     queryLogDeleter.enable = true;
     lists = [
+      {
+        enabled = true;
+        type = "allow";
+        url = "file://${
+          pkgs.writeTextFile {
+            name = "local-allowlist.txt";
+            text = builtins.readFile ../pi-hole/allow.txt;
+          }
+        }";
+        description = "Local Allowlist";
+      }
+      {
+        enabled = true;
+        type = "block";
+        url = "file://${
+          pkgs.writeTextFile {
+            name = "local-blocklist.txt";
+            text = builtins.readFile ../pi-hole/block.txt;
+          }
+        }";
+        description = "Local Blacklist";
+      }
       {
         enabled = true;
         url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.plus.txt";
