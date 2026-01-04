@@ -28,14 +28,27 @@
             ./hardware/pi/hardware-pi02.nix
             ./common.nix
             ./components/pi-hole.nix
-            {
-              services.tailscale.serve = {
-                "443" = {
-                  target = "https+insecure://localhost:443";
-                  depends = [ "pihole-ftl.service" ];
+            (
+              { config, lib, ... }:
+              {
+                services.tailscale.serve = {
+                  "443" =
+                    let
+                      portsStr = config.services.pihole-web.ports; # e.g., "80r,443s,8080"
+                      portsList = lib.splitString "," portsStr;
+
+                      firstNonRedirect = lib.head (lib.filter (p: !lib.hasSuffix "r" p) portsList);
+
+                      port = builtins.head (builtins.split "[[:alpha:]]+" firstNonRedirect);
+                      tls = lib.hasSuffix "s" firstNonRedirect;
+                    in
+                    {
+                      target = "${if tls then "https+insecure" else "http"}://localhost:${port}";
+                      depends = [ "pihole-ftl.service" ];
+                    };
                 };
-              };
-            }
+              }
+            )
           ]
           ++ extraModules;
         };
@@ -51,14 +64,17 @@
           systemName = "nine-cross-pi-hole-secondary";
           extraModules = [
             ./components/homebridge.nix
-            {
-              services.tailscale.serve."8581" = {
-                target = "http://localhost:8581";
-                depends = [ "homebridge.service" ];
-              };
-              # Required so that Homebridge subrouters/service discovery works
-              networking.firewall.trustedInterfaces = [ "wlan0" ];
-            }
+            (
+              { config, ... }:
+              {
+                services.tailscale.serve."8581" = {
+                  target = "http://localhost:${toString config.services.homebridge.uiSettings.port}";
+                  depends = [ "homebridge.service" ];
+                };
+                # Required so that Homebridge subrouters/service discovery works
+                networking.firewall.trustedInterfaces = [ "wlan0" ];
+              }
+            )
           ];
         };
 
