@@ -46,6 +46,7 @@ in
     settings = {
       dns = {
         listeningMode = "ALL";
+        dnssec = true;
         upstreams = [
           "127.0.0.1#${toString unboundPort}"
         ];
@@ -62,6 +63,11 @@ in
       }
     ];
   };
+
+  # This is by far the simplest solution to getting timesync
+  # everything else would rely on the pi having the correct time to securely use HTTPS. This way,
+  # we just rely on the network which will probably bounce back to us anyway
+  networking.resolvconf.useLocalResolver = false;
 
   # Needed since we use this below
   boot.kernel.sysctl."net.core.rmem_max" = 1048576;
