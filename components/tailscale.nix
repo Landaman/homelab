@@ -175,7 +175,7 @@ in
               fi
 
               # Extract currently served ports from TCP section
-              current_ports=$(echo "$current_status" | jq -r '.TCP | keys[]?')
+              current_ports=$(echo "$current_status" | jq -r '(.TCP // {}) | keys[]?')
 
               # Define desired ports from configuration
               desired_ports_array=(${lib.concatStringsSep " " (lib.attrNames serveConfig)})
