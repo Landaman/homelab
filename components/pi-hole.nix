@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }:
 let
@@ -160,4 +161,20 @@ in
   };
 
   services.tailscale.tags = lib.mkBefore [ "tag:pi-hole" ];
+  services.tailscale.serve = {
+    "443" =
+      let
+        portsStr = config.services.pihole-web.ports; # e.g., "80r,443s,8080"
+        portsList = lib.splitString "," portsStr;
+
+        firstNonRedirect = lib.head (lib.filter (p: !lib.hasSuffix "r" p) portsList);
+
+        port = builtins.head (builtins.split "[[:alpha:]]+" firstNonRedirect);
+        tls = lib.hasSuffix "s" firstNonRedirect;
+      in
+      {
+        target = "${if tls then "https+insecure" else "http"}://localhost:${port}";
+        depends = [ "pihole-ftl.service" ];
+      };
+  };
 }
