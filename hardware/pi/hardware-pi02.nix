@@ -1,5 +1,4 @@
 {
-  pkgs,
   modulesPath,
   hardware,
   ...
@@ -30,13 +29,6 @@
     };
   };
 
-  hardware = {
-    deviceTree = {
-      enable = true;
-      kernelPackage = pkgs.linuxKernel.packages.linux_rpi3.kernel;
-    };
-  };
-
   boot = {
     # Networking does not work properly without this https://github.com/raspberrypi/bookworm-feedback/issues/279
     extraModprobeConfig = ''
@@ -44,12 +36,5 @@
       options brcmfmac feature_disable=0x82000
       options brcmfmac feature_disable=0x2000
     '';
-
-    kernelPackages = pkgs.linuxPackages_rpi02w;
-
-    loader = {
-      grub.enable = false;
-      generic-extlinux-compatible.enable = true;
-    };
   };
 }
