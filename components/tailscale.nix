@@ -18,7 +18,7 @@ in
       description = "Tags to apply to this Tailscale device. Must start with tag:. The location tag is automatically applied.";
     };
 
-    services.tailscale.serve = lib.mkOption {
+    services.tailscale.machineServe = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {
           options = {
@@ -131,22 +131,24 @@ in
       extraUpFlags = extraSetFlags; # Without this, you can't use up after set runs
     };
 
-    systemd.services.tailscale-serve =
+    systemd.services.tailscale-machine-serve =
       let
         depends = (
-          lib.flatten (lib.mapAttrsToList (_: value: value.depends) config.services.tailscale.serve)
+          lib.flatten (lib.mapAttrsToList (_: value: value.depends) config.services.tailscale.machineServe)
         );
-        serveConfig = config.services.tailscale.serve;
+        serveConfig = config.services.tailscale.machineServe;
       in
       lib.mkIf config.services.tailscale.enable {
         description = "Set up the system to serve the configured services over Tailscale HTTPS";
 
         after = [
+          "tailscaled.service"
           "tailscaled-autoconnect.service"
+          "tailscaled-set.service"
         ]
         ++ depends;
         wants = [
-          "tailscaled-autoconnect.service"
+          "tailscaled.service"
         ]
         ++ depends;
         wantedBy = [ "multi-user.target" ];

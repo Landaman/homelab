@@ -161,7 +161,7 @@ in
   };
 
   services.tailscale.tags = lib.mkBefore [ "tag:pi-hole" ];
-  services.tailscale.serve = {
+  services.tailscale.machineServe = {
     "443" =
       let
         portsStr = config.services.pihole-web.ports; # e.g., "80r,443s,8080"
