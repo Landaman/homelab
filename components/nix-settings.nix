@@ -7,4 +7,8 @@
       "@wheel"
     ];
   };
+
+  boot.kernel.sysctl = {
+    "kernel.panic" = 5;
+  };
 }
