@@ -1,6 +1,7 @@
 {
   modulesPath,
   hardware,
+  pkgs,
   ...
 }:
 {
@@ -30,6 +31,9 @@
   };
 
   boot = {
+    # Explicitly set so we get the Hydra cached version
+    kernelPackages = pkgs.linuxPackages;
+
     # Networking does not work properly without this https://github.com/raspberrypi/bookworm-feedback/issues/279
     extraModprobeConfig = ''
       options brcmfmac roamoff=1
