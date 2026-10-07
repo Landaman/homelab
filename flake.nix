@@ -29,6 +29,9 @@
             ./hardware/pi/hardware-pi02.nix
             ./common.nix
             ./components/pi-hole.nix
+            {
+              nixpkgs.overlays = [ (import ./overlays/pihole-ftl.nix) ];
+            }
           ]
           ++ extraModules;
         };
